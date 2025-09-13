@@ -1,34 +1,19 @@
 
 :root{
-  --brand: #8a5cf6;
-  --brand-2:#3ee0ff;
-  --bg:#0e0f13;
-  --card:#141620;
-  --border:#272a39;
+  --brand:#8a5cf6; --brand2:#3ee0ff; --bg:#0f1116; --card:#151a23; --border:#2b3344
 }
-*{box-sizing:border-box}
-html,body{background:var(--bg);color:#e8e8f0}
+html,body{background:var(--bg);color:#e9ecf6}
 a{color:#c9d4ff}
-.navbar.bg-gradient,.card.bg-gradient{background:linear-gradient(180deg,#141620,#0f1118)}
-.bg-hero{
-  background:
-    radial-gradient(900px 400px at 20% -10%, rgba(62,224,255,.18), transparent),
-    radial-gradient(800px 500px at 80% -20%, rgba(138,92,246,.25), transparent),
-    var(--bg);
-}
-.neon{
-  box-shadow:0 0 0 1px var(--border), 0 0 15px rgba(138,92,246,.25);
-  border:1px solid var(--border);
-  background:linear-gradient(180deg, #161824, #0f121a);
-  border-radius:16px;
-}
-.btn-neon{
-  border:1px solid rgba(138,92,246,.6);
-  background:linear-gradient(180deg, rgba(138,92,246,.25), rgba(138,92,246,.1));
-  color:white;
-}
+.navbar.bg-gradient,.card.bg-gradient{background:linear-gradient(180deg,#151a23,#0f131a)}
+.bg-hero{background:
+  radial-gradient(900px 400px at 20% -10%, rgba(62,224,255,.18), transparent),
+  radial-gradient(800px 500px at 80% -20%, rgba(138,92,246,.25), transparent),
+  var(--bg)}
+.neon{box-shadow:0 0 0 1px var(--border), 0 0 15px rgba(138,92,246,.25); border:1px solid var(--border); background:linear-gradient(180deg,#171e2a,#0f1219); border-radius:16px}
+.btn-neon{border:1px solid rgba(138,92,246,.6); background:linear-gradient(180deg, rgba(138,92,246,.25), rgba(138,92,246,.1)); color:white}
 .btn-neon:hover{filter:brightness(1.1)}
 .table-dark td,.table-dark th{border-color:var(--border)!important}
 .badge-soft{background:rgba(62,224,255,.15);color:#9ee8ff;border:1px solid rgba(62,224,255,.35)}
 .content p{margin-bottom:.75rem}
 .content h2,.content h3{margin-top:1rem}
+code,kbd,pre{color:#cfe6ff}
