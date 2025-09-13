@@ -7,7 +7,7 @@
 </head>
 <body class="bg-dark text-light">
 <div id="topnav"></div>
-<main class="container my-4">
+<main class="container-fluid my-3">
   <!-- Login Gate -->
   <section id="loginGate" class="row justify-content-center">
     <div class="col-md-8 col-lg-6">
@@ -22,23 +22,27 @@
 
   <!-- Admin Panel -->
   <section id="adminPanel" class="d-none">
-    <div class="d-flex align-items-center justify-content-between mb-3">
-      <div>
-        <h1 class="h4 mb-1">🛠️ หลังบ้าน <span class="badge badge-soft ms-2">Deluxe</span></h1>
-        <div class="small opacity-70">คลิกเมนูซ้ายเพื่อแก้ไขข้อมูล • มีตัวอย่างฟิลด์รูปแบบ URL</div>
-      </div>
-      <div class="d-flex align-items-center gap-2">
-        <div class="badge bg-success d-none" id="roleBadge">admin</div>
-        <button id="btnSignout" class="btn btn-outline-light btn-sm">ออกจากระบบ</button>
-      </div>
-    </div>
+    <div class="admin-shell">
+      <aside class="admin-left neon rounded-2xl">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <strong>เมนูจัดการ</strong>
+          <button id="btnSignout" class="btn btn-sm btn-outline-light">ออก</button>
+        </div>
+        <div id="adminMenu" class="list-group"></div>
+        <div id="statsBox" class="neon p-2 mt-3 rounded-2xl"></div>
+      </aside>
 
-    <div class="row g-3">
-      <div class="col-lg-3 admin-aside">
-        <div class="list-group sticky-top-md" id="adminMenu"></div>
-        <div id="statsBox" class="neon p-3 mt-3 small rounded-2xl"></div>
-      </div>
-      <div class="col-lg-9">
+      <section class="admin-main">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div>
+            <h1 class="h4 mb-1">🛠️ หลังบ้าน <span class="badge badge-soft ms-2">Deluxe</span></h1>
+            <div class="small hint">คลิกเมนูซ้ายเพื่อแก้ไขข้อมูล • ตัวอย่างฟิลด์รูปแบบ URL</div>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <div class="badge bg-success d-none" id="roleBadge">admin</div>
+          </div>
+        </div>
+
         <div class="card neon rounded-2xl">
           <div class="card-body">
             <h2 id="adminTitle" class="h5 mb-3">Guides</h2>
@@ -53,8 +57,8 @@
             <div class="table-responsive">
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <div class="input-group w-auto">
-                  <span class="input-group-text bg-dark text-light border-secondary">🔎</span>
-                  <input id="gridSearch" class="form-control bg-dark text-light border-secondary" placeholder="ค้นหารายการในตาราง">
+                  <span class="input-group-text">🔎</span>
+                  <input id="gridSearch" class="form-control" placeholder="ค้นหารายการในตาราง">
                 </div>
                 <span class="small opacity-70" id="gridCount"></span>
               </div>
@@ -65,7 +69,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   </section>
 </main>
@@ -84,38 +88,23 @@
 <script src="assets/js/admin.js"></script>
 <script>
   window.renderShell && window.renderShell();
-
-  // Gate: show login if not authenticated or not admin
+  // Gate
   const loginGate = document.getElementById('loginGate');
   const adminPanel = document.getElementById('adminPanel');
   const roleBadge = document.getElementById('roleBadge');
   const loginError = document.getElementById('loginError');
-
-  function showLogin(msg){
-    loginGate.classList.remove('d-none');
-    adminPanel.classList.add('d-none');
-    if(msg){ loginError.textContent = msg; loginError.classList.remove('d-none'); }
-  }
-  function showAdmin(){
-    loginGate.classList.add('d-none');
-    adminPanel.classList.remove('d-none');
-    roleBadge.classList.remove('d-none');
-    if(window.initAdminUI){ window.initAdminUI(); } // initialize admin UI once
-  }
-
-  // Sign in/out handlers (popup -> redirect fallback)
+  function showLogin(msg){ loginGate.classList.remove('d-none'); adminPanel.classList.add('d-none'); if(msg){ loginError.textContent = msg; loginError.classList.remove('d-none'); } }
+  function showAdmin(){ loginGate.classList.add('d-none'); adminPanel.classList.remove('d-none'); roleBadge.classList.remove('d-none'); if(window.initAdminUI){ window.initAdminUI(); } }
   document.getElementById('btnGoogle').addEventListener('click', async ()=>{
     const provider = new firebase.auth.GoogleAuthProvider();
-    try{ await auth.signInWithPopup(provider); }
-    catch(err){
+    try{ await auth.signInWithPopup(provider); }catch(err){
       if(['auth/popup-blocked','auth/operation-not-supported-in-this-environment','auth/cancelled-popup-request'].includes(err?.code)){
         try{ await auth.signInWithRedirect(provider); }catch(e2){ showLogin(e2.message || 'Sign-in failed'); }
       }else{ showLogin(err.message || 'Sign-in failed'); }
     }
   });
   document.getElementById('btnSignout').addEventListener('click', async ()=>{ await auth.signOut(); });
-
-  let initialized = false;
+  let initialized=false;
   auth.onAuthStateChanged(async (user)=>{
     if(!user){ showLogin(); return; }
     try{

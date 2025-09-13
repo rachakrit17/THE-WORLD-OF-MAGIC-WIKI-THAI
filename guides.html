@@ -1,7 +1,7 @@
 
 <!doctype html><html lang="th"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ไกด์ — THE‑WORLD‑OF‑MAGIC‑WIKI‑THAI</title>
+<title>📚 ไกด์ — THE‑WORLD‑OF‑MAGIC‑WIKI‑THAI</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/styles.css">
 </head>
@@ -9,23 +9,12 @@
 <div id="topnav"></div>
 <main class="container my-4">
   <div class="d-flex justify-content-between align-items-end mb-3">
-    <div>
-      <h1 class="h4 mb-1">📚 ไกด์</h1>
-      <div class="small hint">กดค้นหา 🔎 หรือเลือกจากการ์ดด้านล่าง • ใช้ <code>#slug</code> ใน URL เพื่อเลื่อนอัตโนมัติ</div>
-    </div>
+    <h1 class="h4">📚 ไกด์</h1>
     <button id="btnSearch" class="btn btn-neon">🔎 ค้นหา</button>
   </div>
-
-  <div id="guideCards" class="row g-3"></div>
-
-  <article id="guideArticle" class="neon p-3 rounded-2xl mt-4 d-none">
-    <h2 id="guideTitle" class="h5 mb-3"></h2>
-    <img id="guideImage" class="rounded-3 mb-3 d-none" style="max-height:260px;object-fit:cover">
-    <div id="guideContent" class="content"></div>
-  </article>
+  <div id="cards" class="row g-3"></div>
 </main>
 <div id="footer"></div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
@@ -37,41 +26,7 @@
 <script src="assets/js/fx.js"></script>
 <script src="assets/js/app.js"></script>
 <script>
-  window.renderShell && window.renderShell();
-
-  // Render cards
-  (async function(){
-    const con = document.getElementById('guideCards');
-    const lang = i18next.language || 'th';
-    const snap = await db.collection('guides').where('published','==', true).limit(400).get();
-    const docs = snap.docs.map(d=>({id:d.id, ...d.data()}))
-      .sort((a,b)=> (b.updatedAt?.toMillis?.() || +new Date(b.updatedAt||0)) - (a.updatedAt?.toMillis?.() || +new Date(a.updatedAt||0)));
-    con.innerHTML = docs.map(g=>{
-      const title = (lang==='th' && g.title_th) ? g.title_th : (g.title_en||'');
-      const img = g.image || '';
-      return `<div class="col-sm-6 col-lg-4">
-        <a href="#${g.slug||g.id}" class="card h-100 neon tilt link-light">
-          ${img? `<img src="${img}" class="card-img-top">`:''}
-          <div class="card-body"><h3 class="h6 mb-2">💫 ${title}</h3></div>
-        </a></div>`;
-    }).join('') || '<div class="text-secondary">ยังไม่มีไกด์ที่เผยแพร่</div>';
-
-    showFromHash(docs);
-    window.addEventListener('hashchange', ()=> showFromHash(docs));
-  })();
-
-  function showFromHash(docs){
-    const id = (location.hash||'').slice(1);
-    if(!id){ document.getElementById('guideArticle').classList.add('d-none'); return; }
-    const lang = i18next.language || 'th';
-    const g = docs.find(x=> (x.slug && x.slug===id) || x.id === id);
-    if(!g){ return; }
-    const title = (lang==='th' && g.title_th) ? g.title_th : (g.title_en||'');
-    document.getElementById('guideTitle').textContent = title;
-    if(g.image){ const im = document.getElementById('guideImage'); im.src=g.image; im.classList.remove('d-none'); }
-    document.getElementById('guideContent').innerText = (lang==='th' && g.content_th)? g.content_th : (g.content_en||'');
-    document.getElementById('guideArticle').classList.remove('d-none');
-    document.getElementById('guideArticle').scrollIntoView({behavior:'smooth'});
-  }
+window.renderShell && window.renderShell();
+renderCollectionCards({col:'guides', containerId:'cards', titleKey_th:'title_th', titleKey_en:'title_en', subtitleKeys:["tags"]});
 </script>
 </body></html>

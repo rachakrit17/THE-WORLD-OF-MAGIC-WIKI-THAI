@@ -65,15 +65,11 @@
 <script src="assets/js/app.js"></script>
 <script>
   window.renderShell && window.renderShell();
-  window.enableTilt && window.enableTilt();
-
-  // Load latest guides (client sort to avoid composite index)
   (async function(){
     const lang = i18next.language || 'th';
     const con = document.getElementById('homeGuides');
     const snap = await db.collection('guides').where('published','==', true).limit(200).get();
-    const docs = snap.docs
-      .map(d=>({id:d.id, ...d.data()}))
+    const docs = snap.docs.map(d=>({id:d.id, ...d.data()}))
       .sort((a,b)=> (b.updatedAt?.toMillis?.() || +new Date(b.updatedAt||0)) - (a.updatedAt?.toMillis?.() || +new Date(a.updatedAt||0)))
       .slice(0,6);
     con.innerHTML = docs.map(g=>{
@@ -84,10 +80,7 @@
         ${img? `<img src="${img}" class="card-img-top">`:''}
         <div class="card-body"><h3 class="h6 mb-2">💫 ${title}</h3><p class="small opacity-70">${excerpt}…</p></div></a></div>`;
     }).join('') || '<div class="text-secondary">ยังไม่มีไกด์ที่เผยแพร่</div>';
-    window.enableTilt && window.enableTilt();
   })();
-
-  // Simple slider from Events banners
   (async function(){
     const slides = document.getElementById('slides');
     const snap = await db.collection('events').where('published','==', true).limit(12).get();
