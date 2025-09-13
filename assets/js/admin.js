@@ -1,109 +1,133 @@
 
 (function(){
   const SCHEMAS = {
-    guides: {
-      title: "Guides",
-      fields: [
-        {k:'title_th', t:'text', label:'ชื่อเรื่อง (TH)', req:true},
-        {k:'title_en', t:'text', label:'Title (EN)'},
-        {k:'slug', t:'text', label:'Slug', req:true},
-        {k:'tags', t:'tags', label:'แท็ก'},
-        {k:'published', t:'bool', label:'เผยแพร่'},
-        {k:'content_th', t:'textarea', label:'เนื้อหา (TH)', rows:8},
-        {k:'content_en', t:'textarea', label:'Content (EN)', rows:8},
-      ],
-      list: ['title_th','slug','published','updatedAt']
-    },
-    classes: {
-      title: "Classes",
-      fields: [
-        {k:'name_th', t:'text', label:'ชื่อ (TH)', req:true},
-        {k:'name_en', t:'text', label:'Name (EN)'},
-        {k:'role', t:'select', label:'บทบาท', options:['Warrior','Ranger','Mage']},
-        {k:'stats', t:'json', label:'ค่าสเตตัส (JSON)'},
-        {k:'published', t:'bool', label:'เผยแพร่'}
-      ],
-      list: ['name_th','role','published','updatedAt']
-    },
-    skills: {
-      title: "Skills",
-      fields: [
-        {k:'class', t:'select', label:'อาชีพ', options:['Warrior','Ranger','Mage']},
-        {k:'name_th', t:'text', label:'ชื่อสกิล (TH)', req:true},
-        {k:'name_en', t:'text', label:'Skill (EN)'},
-        {k:'cooldown', t:'text', label:'คูลดาวน์'},
-        {k:'cost', t:'text', label:'ค่าใช้จ่าย'},
-        {k:'effect', t:'textarea', label:'เอฟเฟกต์', rows:4},
-        {k:'levelReq', t:'number', label:'เลเวลที่ต้องการ'},
-        {k:'published', t:'bool', label:'เผยแพร่'}
-      ],
-      list: ['name_th','class','levelReq','published','updatedAt']
-    },
-    maps: {
-      title: "Maps",
-      fields: [
-        {k:'name_th', t:'text', label:'ชื่อแผนที่ (TH)', req:true},
-        {k:'name_en', t:'text', label:'Name (EN)'},
-        {k:'levelRange', t:'text', label:'ช่วงเลเวล'},
-        {k:'type', t:'text', label:'ประเภท'},
-        {k:'published', t:'bool', label:'เผยแพร่'}
-      ],
-      list: ['name_th','levelRange','type','published','updatedAt']
-    },
-    monsters: {
-      title: "Monsters",
-      fields: [
-        {k:'name_th', t:'text', label:'ชื่อ (TH)', req:true},
-        {k:'name_en', t:'text', label:'Name (EN)'},
-        {k:'type', t:'text', label:'ประเภท'},
-        {k:'level', t:'number', label:'เลเวล'},
-        {k:'mapRef', t:'text', label:'แผนที่'},
-        {k:'drops', t:'tags', label:'ดรอป'},
-        {k:'published', t:'bool', label:'เผยแพร่'}
-      ],
-      list: ['name_th','level','mapRef','published','updatedAt']
-    },
-    equipment: {
-      title: "Equipment",
-      fields: [
-        {k:'name_th', t:'text', label:'ชื่อ (TH)', req:true},
-        {k:'name_en', t:'text', label:'Name (EN)'},
-        {k:'type', t:'select', label:'ชนิด', options:['Weapon','Armor','Helmet','Gloves','Boots','Shield','Accessory']},
-        {k:'classLimit', t:'tags', label:'จำกัดอาชีพ'},
-        {k:'levelReq', t:'number', label:'เลเวลที่ต้องการ'},
-        {k:'stats', t:'json', label:'สเตตัส (JSON)'},
-        {k:'rarity', t:'text', label:'แรร์'},
-        {k:'published', t:'bool', label:'เผยแพร่'}
-      ],
-      list: ['name_th','type','levelReq','rarity','published','updatedAt']
-    },
-    items: {
-      title: "Items",
-      fields: [
-        {k:'name_th', t:'text', label:'ชื่อ (TH)', req:true},
-        {k:'name_en', t:'text', label:'Name (EN)'},
-        {k:'type', t:'text', label:'ประเภท'},
-        {k:'usage', t:'textarea', label:'การใช้', rows:3},
-        {k:'effect', t:'textarea', label:'เอฟเฟกต์', rows:3},
-        {k:'rarity', t:'text', label:'แรร์'},
-        {k:'published', t:'bool', label:'เผยแพร่'}
-      ],
-      list: ['name_th','type','rarity','published','updatedAt']
-    },
-    events: {
-      title: "Events",
-      fields: [
-        {k:'title_th', t:'text', label:'ชื่ออีเวนต์ (TH)', req:true},
-        {k:'title_en', t:'text', label:'Event (EN)'},
-        {k:'startsAt', t:'datetime', label:'เริ่ม'},
-        {k:'endsAt', t:'datetime', label:'จบ'},
-        {k:'details_th', t:'textarea', label:'รายละเอียด (TH)', rows:4},
-        {k:'details_en', t:'textarea', label:'Details (EN)', rows:4},
-        {k:'couponCode', t:'text', label:'คูปอง'},
-        {k:'published', t:'bool', label:'เผยแพร่'}
-      ],
-      list: ['title_th','startsAt','endsAt','couponCode','published','updatedAt']
-    }
+    guides:{ title:"Guides", fields:[
+      {k:'title_th',t:'text',label:'ชื่อเรื่อง (TH)',req:true},
+      {k:'title_en',t:'text',label:'Title (EN)'},
+      {k:'slug',t:'text',label:'Slug',req:true},
+      {k:'tags',t:'tags',label:'แท็ก'},
+      {k:'published',t:'bool',label:'เผยแพร่'},
+      {k:'content_th',t:'textarea',label:'เนื้อหา (TH)',rows:8},
+      {k:'content_en',t:'textarea',label:'Content (EN)',rows:8},
+    ], list:['title_th','slug','published','updatedAt']},
+    classes:{ title:"Classes", fields:[
+      {k:'name_th',t:'text',label:'ชื่อ (TH)',req:true},
+      {k:'name_en',t:'text',label:'Name (EN)'},
+      {k:'role',t:'select',label:'บทบาท',options:['Warrior','Ranger','Mage']},
+      {k:'stats',t:'json',label:'ค่าสเตตัส (JSON)'},
+      {k:'published',t:'bool',label:'เผยแพร่'}
+    ], list:['name_th','role','published','updatedAt']},
+    skills:{ title:"Skills", fields:[
+      {k:'class',t:'select',label:'อาชีพ',options:['Warrior','Ranger','Mage']},
+      {k:'name_th',t:'text',label:'ชื่อสกิล (TH)',req:true},
+      {k:'name_en',t:'text',label:'Skill (EN)'},
+      {k:'cooldown',t:'text',label:'คูลดาวน์'},
+      {k:'cost',t:'text',label:'ค่าใช้จ่าย'},
+      {k:'effect',t:'textarea',label:'เอฟเฟกต์',rows:3},
+      {k:'levelReq',t:'number',label:'เลเวลที่ต้องการ'},
+      {k:'published',t:'bool',label:'เผยแพร่'}
+    ], list:['name_th','class','levelReq','published','updatedAt']},
+    maps:{ title:"Maps", fields:[
+      {k:'name_th',t:'text',label:'ชื่อแผนที่ (TH)',req:true},
+      {k:'name_en',t:'text',label:'Name (EN)'},
+      {k:'levelRange',t:'text',label:'ช่วงเลเวล'},
+      {k:'type',t:'text',label:'ประเภท'},
+      {k:'published',t:'bool',label:'เผยแพร่'}
+    ], list:['name_th','levelRange','type','published','updatedAt']},
+    quests:{ title:"Quests", fields:[
+      {k:'name_th',t:'text',label:'ชื่อเควสต์ (TH)',req:true},
+      {k:'name_en',t:'text',label:'Quest (EN)'},
+      {k:'chain',t:'text',label:'สายเควสต์'},
+      {k:'npc',t:'text',label:'NPC'},
+      {k:'requirements',t:'textarea',label:'เงื่อนไข',rows:3},
+      {k:'rewards',t:'tags',label:'รางวัล'},
+      {k:'published',t:'bool',label:'เผยแพร่'}
+    ], list:['name_th','npc','chain','published','updatedAt']},
+    monsters:{ title:"Monsters", fields:[
+      {k:'name_th',t:'text',label:'ชื่อ (TH)',req:true},
+      {k:'name_en',t:'text',label:'Name (EN)'},
+      {k:'type',t:'text',label:'ประเภท'},
+      {k:'level',t:'number',label:'เลเวล'},
+      {k:'mapRef',t:'text',label:'แผนที่'},
+      {k:'drops',t:'tags',label:'ดรอป'},
+      {k:'published',t:'bool',label:'เผยแพร่'}
+    ], list:['name_th','level','mapRef','published','updatedAt']},
+    equipment:{ title:"Equipment", fields:[
+      {k:'name_th',t:'text',label:'ชื่อ (TH)',req:true},
+      {k:'name_en',t:'text',label:'Name (EN)'},
+      {k:'type',t:'select',label:'ชนิด',options:['Weapon','Armor','Helmet','Gloves','Boots','Shield','Accessory']},
+      {k:'classLimit',t:'tags',label:'จำกัดอาชีพ'},
+      {k:'levelReq',t:'number',label:'เลเวลที่ต้องการ'},
+      {k:'stats',t:'json',label:'สเตตัส (JSON)'},
+      {k:'rarity',t:'text',label:'แรร์'},
+      {k:'published',t:'bool',label:'เผยแพร่'}
+    ], list:['name_th','type','levelReq','rarity','published','updatedAt']},
+    items:{ title:"Items", fields:[
+      {k:'name_th',t:'text',label:'ชื่อ (TH)',req:true},
+      {k:'name_en',t:'text',label:'Name (EN)'},
+      {k:'type',t:'text',label:'ประเภท'},
+      {k:'usage',t:'textarea',label:'การใช้',rows:3},
+      {k:'effect',t:'textarea',label:'เอฟเฟกต์',rows:3},
+      {k:'rarity',t:'text',label:'แรร์'},
+      {k:'published',t:'bool',label:'เผยแพร่'}
+    ], list:['name_th','type','rarity','published','updatedAt']},
+    pets:{ title:"Pets", fields:[
+      {k:'name_th',t:'text',label:'ชื่อ (TH)',req:true},
+      {k:'name_en',t:'text',label:'Name (EN)'},
+      {k:'stats',t:'json',label:'สเตตัส (JSON)'},
+      {k:'skills',t:'tags',label:'สกิลสัตว์เลี้ยง'},
+      {k:'howToGet',t:'textarea',label:'วิธีได้มา',rows:3},
+      {k:'enchantInfo',t:'textarea',label:'Pet Enchant',rows:3},
+      {k:'published',t:'bool',label:'เผยแพร่'}
+    ], list:['name_th','published','updatedAt']},
+    costumes:{ title:"Costumes", fields:[
+      {k:'name_th',t:'text',label:'ชื่อ (TH)',req:true},
+      {k:'name_en',t:'text',label:'Name (EN)'},
+      {k:'slot',t:'text',label:'ตำแหน่ง'},
+      {k:'bonus',t:'textarea',label:'บัฟ',rows:3},
+      {k:'published',t:'bool',label:'เผยแพร่'}
+    ], list:['name_th','slot','published','updatedAt']},
+    factions:{ title:"Factions", fields:[
+      {k:'name_th',t:'text',label:'ชื่อฝ่าย (TH)',req:true},
+      {k:'name_en',t:'text',label:'Faction (EN)'},
+      {k:'lore_th',t:'textarea',label:'ตำนาน (TH)',rows:4},
+      {k:'lore_en',t:'textarea',label:'Lore (EN)',rows:4},
+      {k:'bonuses',t:'tags',label:'โบนัส'},
+      {k:'published',t:'bool',label:'เผยแพร่'}
+    ], list:['name_th','published','updatedAt']},
+    shops:{ title:"Shops", fields:[
+      {k:'name_th',t:'text',label:'ชื่อร้าน (TH)',req:true},
+      {k:'name_en',t:'text',label:'Shop (EN)'},
+      {k:'location',t:'text',label:'พิกัด/เมือง'},
+      {k:'items',t:'tags',label:'รายการ'},
+      {k:'published',t:'bool',label:'เผยแพร่'}
+    ], list:['name_th','location','published','updatedAt']},
+    servers:{ title:"Servers", fields:[
+      {k:'name_th',t:'text',label:'ชื่อเซิร์ฟ (TH)',req:true},
+      {k:'name_en',t:'text',label:'Server (EN)'},
+      {k:'region',t:'text',label:'ภูมิภาค'},
+      {k:'status',t:'select',label:'สถานะ',options:['Online','Maintenance','Closed']},
+      {k:'openedAt',t:'datetime',label:'เปิด'},
+      {k:'published',t:'bool',label:'เผยแพร่'}
+    ], list:['name_th','region','status','published','updatedAt']},
+    events:{ title:"Events", fields:[
+      {k:'title_th',t:'text',label:'ชื่ออีเวนต์ (TH)',req:true},
+      {k:'title_en',t:'text',label:'Event (EN)'},
+      {k:'startsAt',t:'datetime',label:'เริ่ม'},
+      {k:'endsAt',t:'datetime',label:'จบ'},
+      {k:'details_th',t:'textarea',label:'รายละเอียด (TH)',rows:4},
+      {k:'details_en',t:'textarea',label:'Details (EN)',rows:4},
+      {k:'couponCode',t:'text',label:'คูปอง'},
+      {k:'published',t:'bool',label:'เผยแพร่'}
+    ], list:['title_th','startsAt','endsAt','couponCode','published','updatedAt']},
+    attributions:{ title:"Attributions", fields:[
+      {k:'title',t:'text',label:'ชื่อแหล่งที่มา/บทความ',req:true},
+      {k:'url',t:'text',label:'ลิงก์'},
+      {k:'author',t:'text',label:'ผู้เขียน/ผู้มีส่วนร่วม'},
+      {k:'license',t:'text',label:'สัญญาอนุญาต (เช่น CC BY-SA 3.0)'},
+      {k:'notes',t:'textarea',label:'หมายเหตุ',rows:3},
+      {k:'published',t:'bool',label:'เผยแพร่'}
+    ], list:['title','license','url','published','updatedAt']}
   };
 
   // ------- Auth gate -------
@@ -123,7 +147,7 @@
   // ------- UI builders -------
   function el(tag, attrs={}, html=''){
     const e = document.createElement(tag);
-    Object.entries(attrs).forEach(([k,v])=> e.setAttribute(k,v));
+    Object.entries(attrs).forEach(([k,v])=> { if(v!==undefined) e.setAttribute(k,v) });
     if(html) e.innerHTML = html;
     return e;
   }
@@ -179,23 +203,24 @@
       else if(f.t==='tags') data[f.k] = el.value.split(',').map(s=>s.trim()).filter(Boolean);
       else if(f.t==='json'){
         try { data[f.k] = el.value? JSON.parse(el.value): {}; } catch(e){ alert('JSON ไม่ถูกต้องที่ฟิลด์: '+f.label); throw e; }
-      }
-      else data[f.k] = el.value;
+      } else if(f.t==='datetime'){
+        data[f.k] = el.value ? new Date(el.value) : null;
+      } else data[f.k] = el.value;
     });
     return data;
   }
 
   function fillForm(obj){
     SCHEMAS[currentCol].fields.forEach(f=>{
-      const el = document.getElementById(f.k); if(!el) return;
+      const elem = document.getElementById(f.k); if(!elem) return;
       const v = obj[f.k];
-      if(f.t==='bool') el.checked = !!v;
-      else if(f.t==='json') el.value = v? JSON.stringify(v, null, 2): '';
-      else if(f.t==='tags') el.value = (v||[]).join(', ');
+      if(f.t==='bool') elem.checked = !!v;
+      else if(f.t==='json') elem.value = v? JSON.stringify(v, null, 2): '';
+      else if(f.t==='tags') elem.value = (v||[]).join(', ');
       else if(f.t==='datetime'){
-        if(v){ const dt = (v.toDate? v.toDate(): new Date(v)); el.value = new Date(dt.getTime()-dt.getTimezoneOffset()*60000).toISOString().slice(0,16); }
+        if(v){ const dt = (v.toDate? v.toDate(): new Date(v)); elem.value = new Date(dt.getTime()-dt.getTimezoneOffset()*60000).toISOString().slice(0,16); }
       }
-      else el.value = (v ?? '');
+      else elem.value = (v ?? '');
     });
   }
 
@@ -204,12 +229,12 @@
     const body = document.getElementById('gridBody');
     const cols = SCHEMAS[currentCol].list;
     head.innerHTML = `<tr>${cols.map(c=>`<th>${c}</th>`).join('')}<th></th></tr>`;
-    const snap = await db.collection(currentCol).orderBy('updatedAt','desc').limit(200).get();
+    const snap = await db.collection(currentCol).orderBy('updatedAt','desc').limit(500).get();
     body.innerHTML = snap.docs.map(d=>{
       const row = cols.map(c=>{
         const v = d.data()[c];
         if(v && v.toDate) return new Date(v.toDate()).toLocaleString();
-        return (typeof v === 'object') ? JSON.stringify(v) : (v ?? '');
+        return (typeof v === 'object' && v!==null) ? JSON.stringify(v) : (v ?? '');
       }).join('</td><td>');
       return `<tr><td>${row}</td><td><button class="btn btn-sm btn-outline-light" data-id="${d.id}">แก้ไข</button></td></tr>`;
     }).join('');
@@ -245,8 +270,52 @@
       else { const ref = await db.collection(currentCol).add(data); currentId = ref.id; }
       alert('บันทึกแล้ว'); await loadGrid();
     });
+
+    // Bulk Import/Export
+    document.getElementById('btnExport').addEventListener('click', async ()=>{
+      const snap = await db.collection(currentCol).get();
+      const data = snap.docs.map(d=>({id:d.id, ...d.data()}));
+      const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download = currentCol+'.json'; a.click();
+      URL.revokeObjectURL(url);
+    });
+    document.getElementById('btnImport').addEventListener('click', async ()=>{
+      const file = document.getElementById('importFile').files[0];
+      if(!file) { alert('เลือกไฟล์ก่อน'); return; }
+      const text = await file.text();
+      let arr = [];
+      try{
+        if(file.name.endsWith('.json')){
+          arr = JSON.parse(text);
+        } else if(file.name.endsWith('.csv')){
+          const lines = text.split(/\r?\n/).filter(Boolean);
+          const headers = lines.shift().split(',').map(s=>s.trim());
+          arr = lines.map(l=>{
+            const cells = l.split(','); const obj={};
+            headers.forEach((h,i)=> obj[h]=cells[i]);
+            return obj;
+          });
+        }
+      }catch(e){ alert('รูปแบบไฟล์ไม่ถูกต้อง'); return; }
+      const batchSize = 400; // Firestore quota safe
+      for(let i=0;i<arr.length;i+=batchSize){
+        const chunk = arr.slice(i,i+batchSize);
+        const batch = db.batch();
+        chunk.forEach(rec=>{
+          const id = rec.id; delete rec.id;
+          if(rec.updatedAt===undefined) rec.updatedAt = new Date();
+          const ref = id? db.collection(currentCol).doc(id): db.collection(currentCol).doc();
+          batch.set(ref, rec, {merge:true});
+        });
+        await batch.commit();
+      }
+      alert('นำเข้าข้อมูลเสร็จ');
+      await loadGrid();
+    });
   }
 
+  // Init
   document.addEventListener('DOMContentLoaded', async ()=>{
     try{ await requireAdmin(); }catch(e){ return; }
     renderMenu(); renderForm(); bindEvents(); await loadGrid();
