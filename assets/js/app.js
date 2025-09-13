@@ -5,7 +5,7 @@
   window.renderShell = function(){
     const top = document.getElementById('topnav');
     if(top){
-      top.outerHTML = `<nav class="navbar navbar-expand-lg navbar-dark bg-gradient shadow-sm">
+      top.outerHTML = `<nav id="navBar" class="navbar navbar-expand-lg navbar-dark bg-gradient shadow-sm">
         <div class="container">
           <a class="navbar-brand fw-bold brand-grad" href="index.html">${BRAND_FULL}</a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
@@ -55,6 +55,10 @@
     const y = document.getElementById('year'); if(y) y.textContent = new Date().getFullYear();
     window.i18nInit && window.i18nInit();
     document.getElementById('langSelect')?.addEventListener('change', e=> window.switchLang(e.target.value));
+
+    // Set CSS var for admin fixed top offset
+    const nav = document.getElementById('navBar');
+    if(nav){ document.documentElement.style.setProperty('--navH', (nav.offsetHeight || 72)+'px'); }
 
     // --- Search overlay ---
     if(!document.getElementById('searchOverlay')){
@@ -106,8 +110,9 @@
     function debounce(fn,ms){ let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args),ms);} }
   };
 
-  // Render collection to cards (client sort to avoid index requirement)
-  window.renderCollectionCards = async function({col, containerId, titleKey_th='name_th', titleKey_en='name_en', subtitleKeys=[]}){
+  // Render collection cards (client-side sort)
+  window.renderCollectionCards = async function(opts){
+    const {col, containerId, titleKey_th='name_th', titleKey_en='name_en', subtitleKeys=[]} = opts;
     const con = document.getElementById(containerId); if(!con) return;
     const lang = i18next.language || 'th';
     try{
@@ -123,7 +128,7 @@
       con.innerHTML = docs.map(data=>{
         const title = (lang==='th' && data[titleKey_th]) ? data[titleKey_th] : (data[titleKey_en]||'');
         const sub = subtitleKeys.map(k=>data[k]).filter(Boolean).join(' • ');
-        const img = data.image || data.icon || '';
+        const img = data.image || data.icon || data.banner || '';
         return `<div class="col-sm-6 col-xl-4">
           <div class="card h-100 neon tilt">
             ${img ? `<img src="${img}" class="card-img-top" alt="">` : ''}

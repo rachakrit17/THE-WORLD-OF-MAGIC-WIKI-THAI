@@ -9,7 +9,7 @@
       {k:'tags',t:'tags',label:'แท็ก'},
       {k:'published',t:'bool',label:'เผยแพร่'},
       {k:'content_th',t:'textarea',label:'เนื้อหา (TH)',rows:8},
-      {k:'content_en',t:'textarea',label:'Content (EN)',rows:8},
+      {k:'content_en',t:'textarea',label:'Content (EN)',rows:8}
     ], list:['title_th','slug','published','updatedAt']},
     classes:{ title:"🛡️ Classes", fields:[
       {k:'name_th',t:'text',label:'ชื่อ (TH)',req:true},
@@ -133,191 +133,36 @@
     ], list:['title_th','startsAt','endsAt','couponCode','published','updatedAt']}
   };
 
-  function el(tag, attrs={}, html=''){
-    const e = document.createElement(tag);
-    Object.entries(attrs).forEach(([k,v])=> { if(v!==undefined) e.setAttribute(k,v) });
-    if(html) e.innerHTML = html;
-    return e;
-  }
-
+  function el(tag, attrs={}, html=''){ const e=document.createElement(tag); Object.entries(attrs).forEach(([k,v])=>{ if(v!==undefined) e.setAttribute(k,v)}); if(html) e.innerHTML=html; return e; }
   function slugify(s){ return (s||'').toString().normalize('NFKD').replace(/[^\w\s-]/g,'').trim().replace(/\s+/g,'-').toLowerCase().slice(0,120); }
-
-  // --- Rendering left menu
-  function renderMenu(){
-    const menu = document.getElementById('adminMenu'); menu.innerHTML='';
-    Object.keys(SCHEMAS).forEach(key=>{
-      const a = el('a', {href:'#', class:'list-group-item list-group-item-action', 'data-col':key}, SCHEMAS[key].title);
-      menu.appendChild(a);
-    });
-    menu.querySelector('a').classList.add('active');
-  }
-
-  let currentCol = 'guides', currentId = null;
+  function renderMenu(){ const m=document.getElementById('adminMenu'); m.innerHTML=''; Object.keys(SCHEMAS).forEach(k=>{ const a=el('a',{href:'#',class:'list-group-item list-group-item-action','data-col':k},SCHEMAS[k].title); m.appendChild(a)}); m.querySelector('a').classList.add('active'); }
+  let currentCol='guides', currentId=null;
 
   function renderForm(){
-    const form = document.getElementById('adminForm'); form.innerHTML='';
-    const schema = SCHEMAS[currentCol];
-    document.getElementById('adminTitle').textContent = schema.title;
+    const form=document.getElementById('adminForm'); form.innerHTML='';
+    const schema=SCHEMAS[currentCol]; document.getElementById('adminTitle').textContent=schema.title;
     schema.fields.forEach(f=>{
-      const wrap = el('div', {class:'col-md-6'});
-      wrap.appendChild(el('label', {class:'form-label'}, f.label + (f.req?' *':'')));
+      const wrap=el('div',{class:'col-md-6'}); wrap.appendChild(el('label',{class:'form-label'},f.label+(f.req?' *':'')));
       let input;
-      if(f.t==='text' || f.t==='number'){
-        input = el('input', {id:f.k, class:'form-control', type: f.t==='number'?'number':'text', required: f.req?'required':undefined});
-      } else if(f.t==='textarea'){
-        input = el('textarea', {id:f.k, rows:f.rows||4, class:'form-control'});
-      } else if(f.t==='bool'){
-        wrap.classList.add('col-12','form-check'); wrap.classList.remove('col-md-6');
-        wrap.innerHTML = `<input class="form-check-input" type="checkbox" id="${f.k}"><label class="form-check-label" for="${f.k}">${f.label}</label>`;
-        form.appendChild(wrap); return;
-      } else if(f.t==='select'){
-        input = el('select', {id:f.k, class:'form-select'});
-        (f.options||[]).forEach(op=> input.appendChild(el('option', {value:op}, op)));
-      } else if(f.t==='json'){
-        input = el('textarea', {id:f.k, rows:f.rows||4, class:'form-control', placeholder:'{ "atk": 5, "def": 2 }'});
-      } else if(f.t==='tags'){
-        input = el('input', {id:f.k, class:'form-control', placeholder:'แยกด้วยคอมมา'});
-      } else if(f.t==='datetime'){
-        input = el('input', {id:f.k, class:'form-control', type:'datetime-local'});
-      }
+      if(f.t==='text'||f.t==='number'){ input=el('input',{id:f.k,class:'form-control',type:f.t==='number'?'number':'text', required:f.req?'required':undefined}); }
+      else if(f.t==='textarea'){ input=el('textarea',{id:f.k,rows:f.rows||4,class:'form-control'}); }
+      else if(f.t==='bool'){ wrap.classList.add('col-12','form-check'); wrap.classList.remove('col-md-6'); wrap.innerHTML=`<input class="form-check-input" type="checkbox" id="${f.k}"><label class="form-check-label" for="${f.k}">${f.label}</label>`; form.appendChild(wrap); return; }
+      else if(f.t==='select'){ input=el('select',{id:f.k,class:'form-select'}); (f.options||[]).forEach(op=> input.appendChild(el('option',{value:op},op))); }
+      else if(f.t==='json'){ input=el('textarea',{id:f.k,rows:f.rows||4,class:'form-control',placeholder:'{ "atk": 5, "def": 2 }'}); }
+      else if(f.t==='tags'){ input=el('input',{id:f.k,class:'form-control',placeholder:'แยกด้วยคอมมา'}); }
+      else if(f.t==='datetime'){ input=el('input',{id:f.k,class:'form-control',type:'datetime-local'}); }
       wrap.appendChild(input);
-
-      // Image preview for common keys
-      if(['image','icon','banner'].includes(f.k)){
-        const pv = el('div', {class:'col-12 mt-2'});
-        pv.innerHTML = `<img id="${f.k}-preview" class="preview-img d-none" alt="">`;
-        form.appendChild(pv);
-        input.addEventListener('input', ()=>{
-          const url = input.value.trim(); const img = document.getElementById(f.k+'-preview');
-          if(url){ img.src = url; img.classList.remove('d-none'); } else { img.classList.add('d-none'); }
-        });
-      }
-
+      if(['image','icon','banner'].includes(f.k)){ const pv=el('div',{class:'col-12 mt-2'}); pv.innerHTML=`<img id="${f.k}-preview" class="preview-img d-none" alt="">`; form.appendChild(pv); input.addEventListener('input', ()=>{ const url=input.value.trim(); const img=document.getElementById(f.k+'-preview'); if(url){ img.src=url; img.classList.remove('d-none'); } else { img.classList.add('d-none'); } }); }
       form.appendChild(wrap);
     });
-
-    // auto slug from title
-    const tth = document.getElementById('title_th'), ten = document.getElementById('title_en'), slug = document.getElementById('slug');
-    if(slug){
-      const upd=()=>{ if(!slug.value){ slug.value = slugify(tth?.value || ten?.value || ''); } };
-      tth?.addEventListener('input', upd); ten?.addEventListener('input', upd);
-    }
+    const tth=document.getElementById('title_th'), ten=document.getElementById('title_en'), slug=document.getElementById('slug');
+    if(slug){ const upd=()=>{ if(!slug.value){ slug.value=slugify(tth?.value||ten?.value||''); } }; tth?.addEventListener('input',upd); ten?.addEventListener('input',upd); }
   }
 
-  function readForm(){
-    const data = {updatedAt: new Date()};
-    SCHEMAS[currentCol].fields.forEach(f=>{
-      const el = document.getElementById(f.k);
-      if(!el) return;
-      if(f.t==='bool') data[f.k] = el.checked;
-      else if(f.t==='number') data[f.k] = el.value? Number(el.value): null;
-      else if(f.t==='tags') data[f.k] = el.value.split(',').map(s=>s.trim()).filter(Boolean);
-      else if(f.t==='json'){
-        try { data[f.k] = el.value? JSON.parse(el.value): {}; } catch(e){ alert('JSON ไม่ถูกต้องที่ฟิลด์: '+f.label); throw e; }
-      } else if(f.t==='datetime'){
-        data[f.k] = el.value ? new Date(el.value) : null;
-      } else data[f.k] = el.value;
-    });
-    return data;
-  }
-
-  function fillForm(obj){
-    SCHEMAS[currentCol].fields.forEach(f=>{
-      const elem = document.getElementById(f.k); if(!elem) return;
-      const v = obj[f.k];
-      if(f.t==='bool') elem.checked = !!v;
-      else if(f.t==='json') elem.value = v? JSON.stringify(v, null, 2): '';
-      else if(f.t==='tags') elem.value = (v||[]).join(', ');
-      else if(f.t==='datetime'){
-        if(v){ const dt = (v.toDate? v.toDate(): new Date(v)); elem.value = new Date(dt.getTime()-dt.getTimezoneOffset()*60000).toISOString().slice(0,16); }
-      } else elem.value = (v ?? '');
-      // preview refill
-      if(['image','icon','banner'].includes(f.k)){
-        const pv = document.getElementById(f.k+'-preview');
-        if(v){ pv.src = v; pv.classList.remove('d-none'); } else { pv.classList.add('d-none'); }
-      }
-    });
-  }
-
-  async function loadGrid(){
-    const head = document.getElementById('gridHead');
-    const body = document.getElementById('gridBody');
-    const cols = SCHEMAS[currentCol].list;
-    head.innerHTML = `<tr>${cols.map(c=>`<th>${c}</th>`).join('')}<th></th></tr>`;
-    const snap = await db.collection(currentCol).orderBy('updatedAt','desc').limit(500).get();
-    const rows = snap.docs.map(d=>{
-      const row = cols.map(c=>{
-        const v = d.data()[c];
-        if(v && v.toDate) return new Date(v.toDate()).toLocaleString();
-        return (typeof v === 'object' && v!==null) ? JSON.stringify(v) : (v ?? '');
-      }).join('</td><td>');
-      return `<tr><td>${row}</td><td><button class="btn btn-sm btn-outline-light" data-id="${d.id}">แก้ไข</button></td></tr>`;
-    }).join('');
-    body.innerHTML = rows || '<tr><td colspan="99" class="text-secondary">ยังไม่มีข้อมูล</td></tr>';
-    document.getElementById('gridCount').textContent = `${snap.size} รายการ`;
-  }
-
-  function bindEvents(){
-    document.getElementById('adminMenu').addEventListener('click', async (e)=>{
-      if(e.target.matches('[data-col]')){
-        e.preventDefault();
-        document.querySelectorAll('#adminMenu a').forEach(a=>a.classList.remove('active'));
-        e.target.classList.add('active');
-        currentCol = e.target.getAttribute('data-col'); currentId=null;
-        renderForm(); await loadGrid();
-      }
-    });
-    document.getElementById('gridBody').addEventListener('click', async (e)=>{
-      if(e.target.matches('button[data-id]')){
-        const id = e.target.getAttribute('data-id'); currentId=id;
-        const doc = await db.collection(currentCol).doc(id).get();
-        fillForm(doc.data());
-        window.scrollTo({top:0, behavior:'smooth'});
-      }
-    });
-    document.getElementById('btnNew').addEventListener('click', ()=>{ currentId=null; fillForm({}); });
-    document.getElementById('btnDelete').addEventListener('click', async ()=>{
-      if(!currentId) return;
-      if(confirm('ลบรายการนี้?')){ await db.collection(currentCol).doc(currentId).delete(); currentId=null; await loadGrid(); }
-    });
-    document.getElementById('btnSave').addEventListener('click', async (e)=>{
-      e.preventDefault();
-      const data = readForm();
-      if(currentId) await db.collection(currentCol).doc(currentId).set(data, {merge:true});
-      else { const ref = await db.collection(currentCol).add(data); currentId = ref.id; }
-      alert('บันทึกแบบฉบับร่างแล้ว (Draft)');
-      await loadGrid();
-    });
-    document.getElementById('btnPublish').addEventListener('click', async ()=>{
-      const data = readForm();
-      data.published = true;
-      if(currentId) await db.collection(currentCol).doc(currentId).set(data, {merge:true});
-      else { const ref = await db.collection(currentCol).add(data); currentId = ref.id; }
-      alert('เผยแพร่แล้ว 🚀');
-      await loadGrid();
-    });
-    document.getElementById('gridSearch').addEventListener('input', ()=>{
-      const term = document.getElementById('gridSearch').value.toLowerCase();
-      document.querySelectorAll('#gridBody tr').forEach(tr=>{
-        tr.style.display = tr.textContent.toLowerCase().includes(term) ? '' : 'none';
-      });
-    });
-  }
-
-  // Stats in aside (count per collection)
-  async function updateStats(){
-    const box = document.getElementById('statsBox');
-    const cols = Object.keys(SCHEMAS);
-    let html = '<div class="small opacity-70 mb-2">สรุปรายการ (ทั้งหมด)</div>';
-    for(const c of cols){
-      const snap = await db.collection(c).get();
-      html += `<div class="d-flex justify-content-between"><span>${SCHEMAS[c].title}</span><span>${snap.size}</span></div>`;
-    }
-    box.innerHTML = html;
-  }
-
-  // expose one-time init for gate
-  window.initAdminUI = async function(){
-    renderMenu(); renderForm(); bindEvents(); await loadGrid(); updateStats();
-  };
+  function readForm(){ const data={updatedAt:new Date()}; SCHEMAS[currentCol].fields.forEach(f=>{ const el=document.getElementById(f.k); if(!el) return; if(f.t==='bool') data[f.k]=el.checked; else if(f.t==='number') data[f.k]=el.value?Number(el.value):null; else if(f.t==='tags') data[f.k]=el.value.split(',').map(s=>s.trim()).filter(Boolean); else if(f.t==='json'){ try{ data[f.k]=el.value?JSON.parse(el.value):{} }catch(e){ alert('JSON ไม่ถูกต้องที่ฟิลด์: '+f.label); throw e;} } else if(f.t==='datetime'){ data[f.k]=el.value? new Date(el.value): null; } else data[f.k]=el.value; }); return data; }
+  function fillForm(obj){ SCHEMAS[currentCol].fields.forEach(f=>{ const e=document.getElementById(f.k); if(!e) return; const v=obj[f.k]; if(f.t==='bool') e.checked=!!v; else if(f.t==='json') e.value=v?JSON.stringify(v,null,2):''; else if(f.t==='tags') e.value=(v||[]).join(', '); else if(f.t==='datetime'){ if(v){ const dt=(v.toDate? v.toDate(): new Date(v)); e.value=new Date(dt.getTime()-dt.getTimezoneOffset()*60000).toISOString().slice(0,16);} } else e.value=(v??''); if(['image','icon','banner'].includes(f.k)){ const pv=document.getElementById(f.k+'-preview'); if(v){ pv.src=v; pv.classList.remove('d-none'); } else { pv.classList.add('d-none'); } } }); }
+  async function loadGrid(){ const head=document.getElementById('gridHead'); const body=document.getElementById('gridBody'); const cols=SCHEMAS[currentCol].list; head.innerHTML=`<tr>${cols.map(c=>`<th>${c}</th>`).join('')}<th></th></tr>`; const snap=await db.collection(currentCol).limit(500).get(); const docs=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=> (b.updatedAt?.toMillis?.() || +new Date(b.updatedAt||0)) - (a.updatedAt?.toMillis?.() || +new Date(a.updatedAt||0))); const rows=docs.map(d=>{ const row=cols.map(c=>{ const v=d[c]; if(v && v.toDate) return new Date(v.toDate()).toLocaleString(); return (typeof v==='object' && v!==null) ? JSON.stringify(v) : (v ?? ''); }).join('</td><td>'); return `<tr><td>${row}</td><td><button class="btn btn-sm btn-outline-light" data-id="${d.id}">แก้ไข</button></td></tr>`; }).join(''); body.innerHTML=rows || '<tr><td colspan="99" class="text-secondary">ยังไม่มีข้อมูล</td></tr>'; document.getElementById('gridCount').textContent=`${docs.length} รายการ`; }
+  function bindEvents(){ document.getElementById('adminMenu').addEventListener('click', async (e)=>{ if(e.target.matches('[data-col]')||e.target.closest('[data-col]')){ e.preventDefault(); const a=e.target.closest('[data-col]'); document.querySelectorAll('#adminMenu a').forEach(a=>a.classList.remove('active')); a.classList.add('active'); currentCol=a.getAttribute('data-col'); currentId=null; renderForm(); await loadGrid(); } }); document.getElementById('gridBody').addEventListener('click', async (e)=>{ if(e.target.matches('button[data-id]')){ const id=e.target.getAttribute('data-id'); currentId=id; const doc=await db.collection(currentCol).doc(id).get(); fillForm(doc.data()); window.scrollTo({top:0,behavior:'smooth'});} }); document.getElementById('btnNew').addEventListener('click', ()=>{ currentId=null; fillForm({}); }); document.getElementById('btnDelete').addEventListener('click', async ()=>{ if(!currentId) return; if(confirm('ลบรายการนี้?')){ await db.collection(currentCol).doc(currentId).delete(); currentId=null; await loadGrid(); } }); document.getElementById('btnSave').addEventListener('click', async (e)=>{ e.preventDefault(); const data=readForm(); if(currentId) await db.collection(currentCol).doc(currentId).set(data,{merge:true}); else { const ref=await db.collection(currentCol).add(data); currentId=ref.id; } alert('บันทึกแบบฉบับร่างแล้ว (Draft)'); await loadGrid(); }); document.getElementById('btnPublish').addEventListener('click', async ()=>{ const data=readForm(); data.published=true; if(currentId) await db.collection(currentCol).doc(currentId).set(data,{merge:true}); else { const ref=await db.collection(currentCol).add(data); currentId=ref.id; } alert('เผยแพร่แล้ว 🚀'); await loadGrid(); }); document.getElementById('gridSearch').addEventListener('input', ()=>{ const term=document.getElementById('gridSearch').value.toLowerCase(); document.querySelectorAll('#gridBody tr').forEach(tr=>{ tr.style.display=tr.textContent.toLowerCase().includes(term)?'':'none'; }); }); }
+  async function updateStats(){ const box=document.getElementById('statsBox'); const cols=Object.keys(SCHEMAS); let html='<div class="small opacity-70 mb-2">สรุปรายการ (ทั้งหมด)</div>'; for(const c of cols){ const snap=await db.collection(c).get(); html+=`<div class="d-flex justify-content-between"><span>${SCHEMAS[c].title}</span><span>${snap.size}</span></div>`; } box.innerHTML=html; }
+  window.initAdminUI = async function(){ renderMenu(); document.querySelectorAll('#adminMenu .list-group-item').forEach((a,i)=> a.setAttribute('data-col', Object.keys(SCHEMAS)[i])); renderForm(); bindEvents(); await loadGrid(); updateStats(); };
 })();
