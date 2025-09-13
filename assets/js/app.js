@@ -1,17 +1,13 @@
 
 (function(){
   const BRAND_FULL = "THE‑WORLD‑OF‑MAGIC‑WIKI‑THAI";
-  const BRAND_SHORT = "TWOM WIKI TH";
 
   window.renderShell = function(){
     const top = document.getElementById('topnav');
     if(top){
       top.outerHTML = `<nav class="navbar navbar-expand-lg navbar-dark bg-gradient shadow-sm">
         <div class="container">
-          <a class="navbar-brand fw-bold brand-grad" href="index.html">
-            <span class="d-none d-md-inline">${BRAND_FULL}</span>
-            <span class="d-inline d-md-none">${BRAND_SHORT}</span>
-          </a>
+          <a class="navbar-brand fw-bold brand-grad" href="index.html">${BRAND_FULL}</a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
           <div class="collapse navbar-collapse" id="nav">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
@@ -47,7 +43,6 @@
         </div>
       </nav>`;
     }
-    // footer
     const f = document.getElementById('footer');
     if(f){
       f.outerHTML = `<footer class="py-4 border-top border-secondary">
@@ -61,15 +56,15 @@
     window.i18nInit && window.i18nInit();
     document.getElementById('langSelect')?.addEventListener('change', e=> window.switchLang(e.target.value));
 
-    // Search overlay (keep as before)
+    // --- Search overlay ---
     if(!document.getElementById('searchOverlay')){
       const div = document.createElement('div');
       div.id='searchOverlay';
       div.className='search-overlay';
       div.innerHTML = `<div class="search-box neon rounded-2xl">
         <div class="input-group">
-          <span class="input-group-text bg-dark text-light border-secondary">🔎</span>
-          <input id="searchInput" class="form-control bg-dark text-light border-secondary" placeholder="พิมพ์เพื่อค้นหา… (กด Esc เพื่อปิด) / Press / to open">
+          <span class="input-group-text">🔎</span>
+          <input id="searchInput" class="form-control" placeholder="พิมพ์เพื่อค้นหา… (กด Esc เพื่อปิด) / Press / to open">
           <button class="btn btn-outline-light" id="searchClose">✖</button>
         </div>
         <div id="searchResults" class="search-results mt-3 list-group list-group-flush"></div>
@@ -90,7 +85,7 @@
       const collections = ['guides','classes','skills','maps','quests','monsters','equipment','items','pets','costumes','factions','shops','servers','events'];
       const results = [];
       for(const col of collections){
-        const snap = await db.collection(col).limit(50).get();
+        const snap = await db.collection(col).limit(80).get();
         snap.docs.forEach(d=>{
           const o = d.data();
           const text = JSON.stringify(o).toLowerCase();
@@ -101,7 +96,7 @@
         });
       }
       box.innerHTML = results.slice(0,60).map(r=>`<a class="list-group-item bg-transparent text-light border-secondary" href="${linkFor(r)}">💜 ${r.title} <span class="small opacity-70">[${r.col}]</span></a>`).join('') || '<div class="text-secondary p-2">ไม่พบข้อมูล</div>';
-    }, 300));
+    }, 250));
 
     function linkFor(r){
       const map = {guides:'guides.html', classes:'classes.html', skills:'skills.html', maps:'maps.html', quests:'quests.html', monsters:'monsters.html', equipment:'equipment.html', items:'items.html', pets:'pets.html', costumes:'costumes.html', factions:'factions.html', shops:'shops.html', servers:'servers.html', events:'events.html'};
@@ -111,19 +106,21 @@
     function debounce(fn,ms){ let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args),ms);} }
   };
 
-  // Generic list renderer
+  // Render collection to cards (client sort to avoid index requirement)
   window.renderCollectionCards = async function({col, containerId, titleKey_th='name_th', titleKey_en='name_en', subtitleKeys=[]}){
     const con = document.getElementById(containerId); if(!con) return;
     const lang = i18next.language || 'th';
     try{
-      const q = db.collection(col).where('published','==', true).orderBy('updatedAt','desc').limit(200);
+      const q = db.collection(col).where('published','==', true).limit(400);
       const snap = await q.get();
-      if(snap.empty){
-        con.innerHTML = `<div class="text-center text-secondary p-4">ยังไม่มีข้อมูลที่เผยแพร่ในหมวดนี้ ✨<br><small class="opacity-70">ไปที่ หลังบ้าน → ${col}</small></div>`;
+      const docs = snap.docs
+        .map(d=>({id:d.id, ...d.data()}))
+        .sort((a,b)=> (b.updatedAt?.toMillis?.() || +new Date(b.updatedAt||0)) - (a.updatedAt?.toMillis?.() || +new Date(a.updatedAt||0)));
+      if(!docs.length){
+        con.innerHTML = `<div class="text-center text-secondary p-4">ยังไม่มีข้อมูลที่เผยแพร่ในหมวดนี้ ✨</div>`;
         return;
       }
-      con.innerHTML = snap.docs.map(d=>{
-        const data = d.data();
+      con.innerHTML = docs.map(data=>{
         const title = (lang==='th' && data[titleKey_th]) ? data[titleKey_th] : (data[titleKey_en]||'');
         const sub = subtitleKeys.map(k=>data[k]).filter(Boolean).join(' • ');
         const img = data.image || data.icon || '';
