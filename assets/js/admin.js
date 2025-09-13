@@ -4,7 +4,7 @@
     guides:{ title:"📚 Guides", fields:[
       {k:'title_th',t:'text',label:'ชื่อเรื่อง (TH) 💜',req:true},
       {k:'title_en',t:'text',label:'Title (EN)'},
-      {k:'slug',t:'text',label:'Slug',req:true},
+      {k:'slug',t:'text',label:'Slug (url) *',req:true},
       {k:'image',t:'text',label:'รูป (URL) 🖼️'},
       {k:'tags',t:'tags',label:'แท็ก'},
       {k:'published',t:'bool',label:'เผยแพร่'},
@@ -139,10 +139,14 @@
     if(html) e.innerHTML = html;
     return e;
   }
+
+  function slugify(s){ return (s||'').toString().normalize('NFKD').replace(/[^\w\s-]/g,'').trim().replace(/\s+/g,'-').toLowerCase().slice(0,120); }
+
+  // --- Rendering left menu
   function renderMenu(){
     const menu = document.getElementById('adminMenu'); menu.innerHTML='';
     Object.keys(SCHEMAS).forEach(key=>{
-      const a = el('a', {href:'#', class:'list-group-item list-group-item-action bg-transparent text-light border-secondary', 'data-col':key}, SCHEMAS[key].title);
+      const a = el('a', {href:'#', class:'list-group-item list-group-item-action', 'data-col':key}, SCHEMAS[key].title);
       menu.appendChild(a);
     });
     menu.querySelector('a').classList.add('active');
@@ -159,26 +163,45 @@
       wrap.appendChild(el('label', {class:'form-label'}, f.label + (f.req?' *':'')));
       let input;
       if(f.t==='text' || f.t==='number'){
-        input = el('input', {id:f.k, class:'form-control bg-dark text-light border-secondary', type: f.t==='number'?'number':'text', required: f.req?'required':undefined});
+        input = el('input', {id:f.k, class:'form-control', type: f.t==='number'?'number':'text', required: f.req?'required':undefined});
       } else if(f.t==='textarea'){
-        input = el('textarea', {id:f.k, rows:f.rows||4, class:'form-control bg-dark text-light border-secondary'});
+        input = el('textarea', {id:f.k, rows:f.rows||4, class:'form-control'});
       } else if(f.t==='bool'){
         wrap.classList.add('col-12','form-check'); wrap.classList.remove('col-md-6');
         wrap.innerHTML = `<input class="form-check-input" type="checkbox" id="${f.k}"><label class="form-check-label" for="${f.k}">${f.label}</label>`;
         form.appendChild(wrap); return;
       } else if(f.t==='select'){
-        input = el('select', {id:f.k, class:'form-select bg-dark text-light border-secondary'});
+        input = el('select', {id:f.k, class:'form-select'});
         (f.options||[]).forEach(op=> input.appendChild(el('option', {value:op}, op)));
       } else if(f.t==='json'){
-        input = el('textarea', {id:f.k, rows:f.rows||4, class:'form-control bg-dark text-light border-secondary', placeholder:'{ "atk": 5, "def": 2 }'});
+        input = el('textarea', {id:f.k, rows:f.rows||4, class:'form-control', placeholder:'{ "atk": 5, "def": 2 }'});
       } else if(f.t==='tags'){
-        input = el('input', {id:f.k, class:'form-control bg-dark text-light border-secondary', placeholder:'แยกด้วยคอมมา'});
+        input = el('input', {id:f.k, class:'form-control', placeholder:'แยกด้วยคอมมา'});
       } else if(f.t==='datetime'){
-        input = el('input', {id:f.k, class:'form-control bg-dark text-light border-secondary', type:'datetime-local'});
+        input = el('input', {id:f.k, class:'form-control', type:'datetime-local'});
       }
       wrap.appendChild(input);
+
+      // Image preview for common keys
+      if(['image','icon','banner'].includes(f.k)){
+        const pv = el('div', {class:'col-12 mt-2'});
+        pv.innerHTML = `<img id="${f.k}-preview" class="preview-img d-none" alt="">`;
+        form.appendChild(pv);
+        input.addEventListener('input', ()=>{
+          const url = input.value.trim(); const img = document.getElementById(f.k+'-preview');
+          if(url){ img.src = url; img.classList.remove('d-none'); } else { img.classList.add('d-none'); }
+        });
+      }
+
       form.appendChild(wrap);
     });
+
+    // auto slug from title
+    const tth = document.getElementById('title_th'), ten = document.getElementById('title_en'), slug = document.getElementById('slug');
+    if(slug){
+      const upd=()=>{ if(!slug.value){ slug.value = slugify(tth?.value || ten?.value || ''); } };
+      tth?.addEventListener('input', upd); ten?.addEventListener('input', upd);
+    }
   }
 
   function readForm(){
@@ -207,8 +230,12 @@
       else if(f.t==='tags') elem.value = (v||[]).join(', ');
       else if(f.t==='datetime'){
         if(v){ const dt = (v.toDate? v.toDate(): new Date(v)); elem.value = new Date(dt.getTime()-dt.getTimezoneOffset()*60000).toISOString().slice(0,16); }
+      } else elem.value = (v ?? '');
+      // preview refill
+      if(['image','icon','banner'].includes(f.k)){
+        const pv = document.getElementById(f.k+'-preview');
+        if(v){ pv.src = v; pv.classList.remove('d-none'); } else { pv.classList.add('d-none'); }
       }
-      else elem.value = (v ?? '');
     });
   }
 
@@ -218,7 +245,7 @@
     const cols = SCHEMAS[currentCol].list;
     head.innerHTML = `<tr>${cols.map(c=>`<th>${c}</th>`).join('')}<th></th></tr>`;
     const snap = await db.collection(currentCol).orderBy('updatedAt','desc').limit(500).get();
-    body.innerHTML = snap.docs.map(d=>{
+    const rows = snap.docs.map(d=>{
       const row = cols.map(c=>{
         const v = d.data()[c];
         if(v && v.toDate) return new Date(v.toDate()).toLocaleString();
@@ -226,6 +253,8 @@
       }).join('</td><td>');
       return `<tr><td>${row}</td><td><button class="btn btn-sm btn-outline-light" data-id="${d.id}">แก้ไข</button></td></tr>`;
     }).join('');
+    body.innerHTML = rows || '<tr><td colspan="99" class="text-secondary">ยังไม่มีข้อมูล</td></tr>';
+    document.getElementById('gridCount').textContent = `${snap.size} รายการ`;
   }
 
   function bindEvents(){
@@ -256,14 +285,39 @@
       const data = readForm();
       if(currentId) await db.collection(currentCol).doc(currentId).set(data, {merge:true});
       else { const ref = await db.collection(currentCol).add(data); currentId = ref.id; }
-      window.confetti && window.confetti(); // 🎉
-      alert('บันทึกแล้ว');
+      alert('บันทึกแบบฉบับร่างแล้ว (Draft)');
       await loadGrid();
     });
+    document.getElementById('btnPublish').addEventListener('click', async ()=>{
+      const data = readForm();
+      data.published = true;
+      if(currentId) await db.collection(currentCol).doc(currentId).set(data, {merge:true});
+      else { const ref = await db.collection(currentCol).add(data); currentId = ref.id; }
+      alert('เผยแพร่แล้ว 🚀');
+      await loadGrid();
+    });
+    document.getElementById('gridSearch').addEventListener('input', ()=>{
+      const term = document.getElementById('gridSearch').value.toLowerCase();
+      document.querySelectorAll('#gridBody tr').forEach(tr=>{
+        tr.style.display = tr.textContent.toLowerCase().includes(term) ? '' : 'none';
+      });
+    });
+  }
+
+  // Stats in aside (count per collection)
+  async function updateStats(){
+    const box = document.getElementById('statsBox');
+    const cols = Object.keys(SCHEMAS);
+    let html = '<div class="small opacity-70 mb-2">สรุปรายการ (ทั้งหมด)</div>';
+    for(const c of cols){
+      const snap = await db.collection(c).get();
+      html += `<div class="d-flex justify-content-between"><span>${SCHEMAS[c].title}</span><span>${snap.size}</span></div>`;
+    }
+    box.innerHTML = html;
   }
 
   // expose one-time init for gate
   window.initAdminUI = async function(){
-    renderMenu(); renderForm(); bindEvents(); await loadGrid();
+    renderMenu(); renderForm(); bindEvents(); await loadGrid(); updateStats();
   };
 })();
