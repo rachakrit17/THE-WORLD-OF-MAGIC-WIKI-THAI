@@ -133,19 +133,6 @@
     ], list:['title_th','startsAt','endsAt','couponCode','published','updatedAt']}
   };
 
-  async function requireAdmin(){
-    return new Promise((resolve, reject)=>{
-      auth.onAuthStateChanged(async (user)=>{
-        if(!user){ alert('กรุณาเข้าสู่ระบบก่อน'); reject('noauth'); return; }
-        const r = await db.collection('roles').doc(user.uid).get();
-        const ok = r.exists && r.data().role === 'admin';
-        if(!ok){ alert('ไม่มีสิทธิ์ admin'); reject('norole'); return; }
-        document.getElementById('roleBadge').classList.remove('d-none');
-        resolve(user);
-      });
-    });
-  }
-
   function el(tag, attrs={}, html=''){
     const e = document.createElement(tag);
     Object.entries(attrs).forEach(([k,v])=> { if(v!==undefined) e.setAttribute(k,v) });
@@ -172,7 +159,7 @@
       wrap.appendChild(el('label', {class:'form-label'}, f.label + (f.req?' *':'')));
       let input;
       if(f.t==='text' || f.t==='number'){
-        input = el('input', {id:f.k, class:'form-control bg-dark text-light border-secondary', type: f.t==='number'?'number':'text', required: f.req?'required':undefined, placeholder: f.t==='text' && 'URL' in f.label ? 'https://...' : ''});
+        input = el('input', {id:f.k, class:'form-control bg-dark text-light border-secondary', type: f.t==='number'?'number':'text', required: f.req?'required':undefined});
       } else if(f.t==='textarea'){
         input = el('textarea', {id:f.k, rows:f.rows||4, class:'form-control bg-dark text-light border-secondary'});
       } else if(f.t==='bool'){
@@ -275,8 +262,8 @@
     });
   }
 
-  document.addEventListener('DOMContentLoaded', async ()=>{
-    try{ await requireAdmin(); }catch(e){ return; }
+  // expose one-time init for gate
+  window.initAdminUI = async function(){
     renderMenu(); renderForm(); bindEvents(); await loadGrid();
-  });
+  };
 })();
