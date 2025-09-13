@@ -9,22 +9,13 @@
 <div id="topnav"></div>
 <main class="container my-4">
   <div class="d-flex align-items-center justify-content-between mb-3">
-    <h1 class="h4">หลังบ้าน (TH/EN)</h1>
+    <h1 class="h4">🛠️ หลังบ้าน (ใส่ข้อมูลเอง)</h1>
     <div class="badge bg-success d-none" id="roleBadge">admin</div>
   </div>
 
   <div class="row g-3">
     <div class="col-lg-3">
       <div class="list-group" id="adminMenu"></div>
-      <div class="neon p-3 mt-3">
-        <h3 class="h6 mb-2">นำเข้า/ส่งออก</h3>
-        <input id="importFile" type="file" class="form-control form-control-sm bg-dark text-light border-secondary" accept=".json,.csv">
-        <div class="d-grid gap-2 mt-2">
-          <button class="btn btn-neon btn-sm" id="btnImport">นำเข้า JSON/CSV → คอลเลกชันปัจจุบัน</button>
-          <button class="btn btn-outline-light btn-sm" id="btnExport">ส่งออก JSON</button>
-        </div>
-        <p class="small opacity-75 mt-2">* CSV รองรับคอลัมน์ตามชื่อฟิลด์ในแบบฟอร์ม</p>
-      </div>
     </div>
     <div class="col-lg-9">
       <div class="card neon">
@@ -32,9 +23,9 @@
           <h2 id="adminTitle" class="h5 mb-3">Guides</h2>
           <form id="adminForm" class="row g-3"></form>
           <div class="d-flex gap-2 mt-2">
-            <button class="btn btn-neon" id="btnSave">บันทึก</button>
-            <button class="btn btn-secondary" id="btnNew" type="button">ใหม่</button>
-            <button class="btn btn-danger" id="btnDelete" type="button">ลบ</button>
+            <button class="btn btn-neon" id="btnSave">บันทึก ✅</button>
+            <button class="btn btn-secondary" id="btnNew" type="button">ใหม่ 🆕</button>
+            <button class="btn btn-danger" id="btnDelete" type="button">ลบ 🗑️</button>
           </div>
           <hr>
           <div class="table-responsive">
@@ -58,6 +49,7 @@
 <script src="assets/js/i18n.js"></script>
 <script src="assets/js/firebase-init.js"></script>
 <script src="assets/js/auth.js"></script>
+<script src="assets/js/fx.js"></script>
 <script src="assets/js/app.js"></script>
 <script src="assets/js/admin.js"></script>
 <script>window.renderShell && window.renderShell();</script>
