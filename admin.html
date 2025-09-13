@@ -8,36 +8,54 @@
 <body class="bg-dark text-light">
 <div id="topnav"></div>
 <main class="container my-4">
-  <div class="d-flex align-items-center justify-content-between mb-3">
-    <h1 class="h4">🛠️ หลังบ้าน (ใส่ข้อมูลเอง)</h1>
-    <div class="badge bg-success d-none" id="roleBadge">admin</div>
-  </div>
-
-  <div class="row g-3">
-    <div class="col-lg-3">
-      <div class="list-group" id="adminMenu"></div>
+  <!-- Login Gate -->
+  <section id="loginGate" class="row justify-content-center">
+    <div class="col-md-7">
+      <div class="neon p-4 text-center">
+        <h1 class="h4 mb-2">🛡️ เข้าหลังบ้าน</h1>
+        <p class="opacity-75 mb-3">เข้าสู่ระบบด้วย Google ก่อน จึงจะใช้งานหลังบ้านได้</p>
+        <button id="btnGoogle" class="btn btn-neon btn-lg">🔑 Sign in with Google</button>
+        <div id="loginError" class="small text-danger mt-3 d-none"></div>
+      </div>
     </div>
-    <div class="col-lg-9">
-      <div class="card neon">
-        <div class="card-body">
-          <h2 id="adminTitle" class="h5 mb-3">Guides</h2>
-          <form id="adminForm" class="row g-3"></form>
-          <div class="d-flex gap-2 mt-2">
-            <button class="btn btn-neon" id="btnSave">บันทึก ✅</button>
-            <button class="btn btn-secondary" id="btnNew" type="button">ใหม่ 🆕</button>
-            <button class="btn btn-danger" id="btnDelete" type="button">ลบ 🗑️</button>
-          </div>
-          <hr>
-          <div class="table-responsive">
-            <table class="table table-dark table-striped align-middle">
-              <thead id="gridHead"></thead>
-              <tbody id="gridBody"></tbody>
-            </table>
+  </section>
+
+  <!-- Admin Panel -->
+  <section id="adminPanel" class="d-none">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h1 class="h4">🛠️ หลังบ้าน</h1>
+      <div class="d-flex align-items-center gap-2">
+        <div class="badge bg-success d-none" id="roleBadge">admin</div>
+        <button id="btnSignout" class="btn btn-outline-light btn-sm">ออกจากระบบ</button>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-lg-3">
+        <div class="list-group" id="adminMenu"></div>
+      </div>
+      <div class="col-lg-9">
+        <div class="card neon">
+          <div class="card-body">
+            <h2 id="adminTitle" class="h5 mb-3">Guides</h2>
+            <form id="adminForm" class="row g-3"></form>
+            <div class="d-flex gap-2 mt-2">
+              <button class="btn btn-neon" id="btnSave">บันทึก ✅</button>
+              <button class="btn btn-secondary" id="btnNew" type="button">ใหม่ 🆕</button>
+              <button class="btn btn-danger" id="btnDelete" type="button">ลบ 🗑️</button>
+            </div>
+            <hr>
+            <div class="table-responsive">
+              <table class="table table-dark table-striped align-middle">
+                <thead id="gridHead"></thead>
+                <tbody id="gridBody"></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 </main>
 <div id="footer"></div>
 
@@ -52,5 +70,57 @@
 <script src="assets/js/fx.js"></script>
 <script src="assets/js/app.js"></script>
 <script src="assets/js/admin.js"></script>
-<script>window.renderShell && window.renderShell();</script>
+<script>
+  window.renderShell && window.renderShell();
+
+  // Gate: show login if not authenticated or not admin
+  const loginGate = document.getElementById('loginGate');
+  const adminPanel = document.getElementById('adminPanel');
+  const roleBadge = document.getElementById('roleBadge');
+  const loginError = document.getElementById('loginError');
+
+  function showLogin(msg){
+    loginGate.classList.remove('d-none');
+    adminPanel.classList.add('d-none');
+    if(msg){ loginError.textContent = msg; loginError.classList.remove('d-none'); }
+  }
+  function showAdmin(){
+    loginGate.classList.add('d-none');
+    adminPanel.classList.remove('d-none');
+    roleBadge.classList.remove('d-none');
+    if(window.initAdminUI){ window.initAdminUI(); } // initialize admin UI once
+  }
+
+  // Sign in/out handlers (popup -> redirect fallback)
+  document.getElementById('btnGoogle').addEventListener('click', async ()=>{
+    const provider = new firebase.auth.GoogleAuthProvider();
+    try{
+      await auth.signInWithPopup(provider);
+    }catch(err){
+      if(['auth/popup-blocked','auth/operation-not-supported-in-this-environment','auth/cancelled-popup-request'].includes(err?.code)){
+        try{ await auth.signInWithRedirect(provider); }catch(e2){ showLogin(e2.message || 'Sign-in failed'); }
+      }else{
+        showLogin(err.message || 'Sign-in failed');
+      }
+    }
+  });
+  document.getElementById('btnSignout').addEventListener('click', async ()=>{
+    await auth.signOut();
+  });
+
+  let initialized = false;
+  auth.onAuthStateChanged(async (user)=>{
+    if(!user){ showLogin(); return; }
+    try{
+      const r = await db.collection('roles').doc(user.uid).get();
+      if(r.exists && r.data().role === 'admin'){
+        if(!initialized){ showAdmin(); initialized=true; }
+      }else{
+        showLogin('บัญชีนี้ยังไม่ได้รับสิทธิ์ admin');
+      }
+    }catch(e){
+      showLogin('ตรวจสอบสิทธิ์ไม่สำเร็จ');
+    }
+  });
+</script>
 </body></html>
