@@ -38,7 +38,7 @@
       </div>
       <div class="neon p-3 mt-3 rounded-2xl">
         <h3 class="h6">💡 ทริควันนี้</h3>
-        <div class="small opacity-70">กด / เพื่อเปิดค้นหาเร็ว 🔎</div>
+        <div class="small hint">กด / เพื่อเปิดค้นหาเร็ว 🔎</div>
       </div>
     </div>
   </div>
@@ -67,17 +67,20 @@
   window.renderShell && window.renderShell();
   window.enableTilt && window.enableTilt();
 
-  // Load latest guides
+  // Load latest guides (client sort to avoid composite index)
   (async function(){
     const lang = i18next.language || 'th';
     const con = document.getElementById('homeGuides');
-    const snap = await db.collection('guides').where('published','==', true).orderBy('updatedAt','desc').limit(6).get();
-    con.innerHTML = snap.docs.map(d=>{
-      const g = d.data();
+    const snap = await db.collection('guides').where('published','==', true).limit(200).get();
+    const docs = snap.docs
+      .map(d=>({id:d.id, ...d.data()}))
+      .sort((a,b)=> (b.updatedAt?.toMillis?.() || +new Date(b.updatedAt||0)) - (a.updatedAt?.toMillis?.() || +new Date(a.updatedAt||0)))
+      .slice(0,6);
+    con.innerHTML = docs.map(g=>{
       const title = (lang==='th' && g.title_th) ? g.title_th : (g.title_en||'');
       const img = g.image || '';
       const excerpt = (lang==='th' && g.content_th ? g.content_th : g.content_en || '').replace(/<[^>]+>/g,'').slice(0,120);
-      return `<div class="col-md-6"><a href="guides.html#${g.slug||d.id}" class="card h-100 neon tilt link-light">
+      return `<div class="col-md-6"><a href="guides.html#${g.slug||g.id}" class="card h-100 neon tilt link-light">
         ${img? `<img src="${img}" class="card-img-top">`:''}
         <div class="card-body"><h3 class="h6 mb-2">💫 ${title}</h3><p class="small opacity-70">${excerpt}…</p></div></a></div>`;
     }).join('') || '<div class="text-secondary">ยังไม่มีไกด์ที่เผยแพร่</div>';
@@ -87,8 +90,8 @@
   // Simple slider from Events banners
   (async function(){
     const slides = document.getElementById('slides');
-    const snap = await db.collection('events').where('published','==', true).orderBy('startsAt','desc').limit(6).get();
-    const items = snap.docs.map(d=> d.data()).filter(x=>x.banner);
+    const snap = await db.collection('events').where('published','==', true).limit(12).get();
+    const items = snap.docs.map(d=> d.data()).filter(x=>x.banner).sort((a,b)=> (b.startsAt?.toMillis?.() || +new Date(b.startsAt||0)) - (a.startsAt?.toMillis?.() || +new Date(a.startsAt||0)));
     slides.innerHTML = items.map(x=>`<img src="${x.banner}" alt="" class="rounded-3" style="height:150px;object-fit:cover">`).join('');
     let i = 0; setInterval(()=>{ if(items.length>1){ i=(i+1)%items.length; slides.style.transform = 'translateX('+(-i*162)+'px)'; } }, 2800);
   })();
