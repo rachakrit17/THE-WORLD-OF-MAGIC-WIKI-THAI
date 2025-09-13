@@ -1,0 +1,68 @@
+{
+  "guides": [
+    {
+      "title_th": "เรนเจอร์ เก็บเลเวล 1-20",
+      "title_en": "Ranger leveling 1-20",
+      "slug": "ranger-leveling-1-20",
+      "tags": [
+        "ranger",
+        "leveling"
+      ],
+      "content_th": "<p>ไคต์มอน ใช้ธนู ยิงเรื่อย ๆ เน้น Dex</p>",
+      "content_en": "<p>Kite, bow autos, stack Dex.</p>",
+      "published": true,
+      "updatedAt": "NOW"
+    }
+  ],
+  "classes": [
+    {
+      "name_th": "Warrior",
+      "name_en": "Warrior",
+      "role": "Warrior",
+      "stats": {
+        "hp": 3,
+        "atk": 3,
+        "def": 4
+      },
+      "published": true,
+      "updatedAt": "NOW"
+    },
+    {
+      "name_th": "Ranger",
+      "name_en": "Ranger",
+      "role": "Ranger",
+      "stats": {
+        "hp": 2,
+        "atk": 4,
+        "def": 2
+      },
+      "published": true,
+      "updatedAt": "NOW"
+    },
+    {
+      "name_th": "Mage",
+      "name_en": "Mage",
+      "role": "Mage",
+      "stats": {
+        "hp": 1,
+        "atk": 5,
+        "def": 1
+      },
+      "published": true,
+      "updatedAt": "NOW"
+    }
+  ],
+  "events": [
+    {
+      "title_th": "เปิดเซิร์ฟเวอร์ใหม่ Ganesha",
+      "title_en": "New server Ganesha",
+      "startsAt": "2025-09-01T00:00:00Z",
+      "endsAt": "2025-10-01T00:00:00Z",
+      "details_th": "กิจกรรมต้อนรับ เลเวลอัปไว",
+      "details_en": "Welcome boost",
+      "couponCode": "GANESHA-START",
+      "published": true,
+      "updatedAt": "NOW"
+    }
+  ]
+}

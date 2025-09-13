@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="th"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>หน้าแรก — IMO</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body class="bg-dark text-light">
+<div id="topnav"></div>
+
+<header class="py-5 bg-hero">
+  <div class="container text-center">
+    <h1 class="display-5 fw-bold mb-2" data-i18n="hero.title">ศูนย์รวมแฟนเกม</h1>
+    <p class="lead opacity-75" data-i18n="hero.subtitle">ฐานความรู้ภาษาไทย ครบทั้งอาชีพ แผนที่ อุปกรณ์ และกิจกรรม</p>
+    <a href="guides.html" class="btn btn-lg btn-neon" data-i18n="hero.cta">เริ่มสำรวจ</a>
+  </div>
+</header>
+<main class="container my-5">
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <h2 class="h4 mb-3" data-i18n="home.latestGuides">ไกด์ล่าสุด</h2>
+      <div id="homeGuides" class="row g-3"></div>
+    </div>
+    <div class="col-lg-4">
+      <div class="neon p-3">
+        <h3 class="h6" data-i18n="home.browseBy">สำรวจตามหมวด</h3>
+        <div class="d-grid gap-2 mt-2">
+          <a class="btn btn-outline-light" href="classes.html" data-i18n="nav.classes">อาชีพ</a>
+          <a class="btn btn-outline-light" href="maps.html" data-i18n="nav.maps">แผนที่</a>
+          <a class="btn btn-outline-light" href="equipment.html" data-i18n="nav.equipment">อุปกรณ์</a>
+          <a class="btn btn-outline-light" href="events.html" data-i18n="nav.events">อีเวนต์</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="footer"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/i18next@23.11.5/dist/umd/i18next.min.js"></script>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/firebase-init.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/app.js"></script>
+
+<script>
+(async function(){
+  const lang = i18next.language || 'th';
+  const con = document.getElementById('homeGuides');
+  const snap = await db.collection('guides').where('published','==', true).orderBy('updatedAt','desc').limit(6).get();
+  con.innerHTML = snap.docs.map(d=>{
+    const g = d.data();
+    const title = (lang==='th' && g.title_th) ? g.title_th : (g.title_en||'');
+    const excerpt = (lang==='th' && g.content_th ? g.content_th : g.content_en || '').replace(/<[^>]+>/g,'').slice(0,120);
+    return `<div class="col-md-6"><a href="guides.html#${g.slug}" class="card h-100 neon link-light">
+      <div class="card-body"><h3 class="h6 mb-2">${title}</h3><p class="small opacity-75">${excerpt}…</p></div></a></div>`;
+  }).join('');
+})();
+</script>
+
+<script>window.renderShell && window.renderShell();</script>
+</body></html>

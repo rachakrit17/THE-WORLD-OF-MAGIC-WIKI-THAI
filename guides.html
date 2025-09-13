@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="th"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ไกด์ — IMO</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body class="bg-dark text-light">
+<div id="topnav"></div>
+
+<main class="container my-5">
+  <div class="row g-4">
+    <div class="col-lg-4">
+      <input id="search" class="form-control bg-dark text-light border-secondary" placeholder="ค้นหาไกด์…">
+      <ul id="guideList" class="list-group list-group-flush mt-3"></ul>
+    </div>
+    <div class="col-lg-8">
+      <article id="guideView" class="card bg-gradient border-0 neon d-none">
+        <div class="card-body">
+          <h1 id="gTitle" class="h3"></h1>
+          <div id="gMeta" class="small text-secondary mb-3"></div>
+          <div id="gContent" class="content"></div>
+        </div>
+      </article>
+      <div id="empty" class="text-center opacity-75"><p>เลือกไกด์จากด้านซ้าย</p></div>
+    </div>
+  </div>
+</main>
+
+<div id="footer"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/i18next@23.11.5/dist/umd/i18next.min.js"></script>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/firebase-init.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/app.js"></script>
+
+<script>
+(async function(){
+  const list = document.getElementById('guideList');
+  const snap = await db.collection('guides').where('published','==', true).orderBy('updatedAt','desc').get();
+  const lang = i18next.language || 'th';
+  let items = snap.docs.map(d=>({id:d.id, ...d.data()}));
+  function render(){
+    list.innerHTML = items.map(g=>{
+      const title = (lang==='th' && g.title_th) ? g.title_th : (g.title_en||'');
+      return `<li class="list-group-item bg-transparent text-light d-flex justify-content-between align-items-center">
+        <a class="stretched-link link-light" href="#${g.slug}">${title}</a>
+        <span class="badge badge-soft">${(g.tags||[]).join(', ')}</span></li>`;
+    }).join('');
+  }
+  render();
+  if(location.hash) openBySlug(location.hash.substring(1));
+  window.addEventListener('hashchange', ()=> openBySlug(location.hash.substring(1)));
+  async function openBySlug(slug){
+    const q = await db.collection('guides').where('slug','==', slug).limit(1).get();
+    if(q.empty) return;
+    const g = {id:q.docs[0].id, ...q.docs[0].data()};
+    document.getElementById('gTitle').textContent = (lang==='th' && g.title_th) ? g.title_th : g.title_en;
+    const updated = new Date(g.updatedAt?.toDate ? g.updatedAt.toDate() : g.updatedAt).toLocaleString();
+    document.getElementById('gMeta').textContent = `${updated} • ${(g.tags||[]).join(', ')}`;
+    document.getElementById('gContent').innerHTML = (lang==='th' && g.content_th) ? g.content_th : (g.content_en||'');
+    document.getElementById('guideView').classList.remove('d-none');
+    document.getElementById('empty').classList.add('d-none');
+  }
+})();
+</script>
+
+<script>window.renderShell && window.renderShell();</script>
+</body></html>
