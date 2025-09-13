@@ -64,5 +64,16 @@
       "published": true,
       "updatedAt": "NOW"
     }
+  ],
+  "attributions": [
+    {
+      "title": "ตัวอย่างการให้เครดิต (Example)",
+      "url": "https://imotwom.fandom.com",
+      "author": "Community contributors",
+      "license": "CC BY-SA 3.0",
+      "notes": "ใส่ลิงก์ไปที่บทความ/หน้าที่เกี่ยวข้อง",
+      "published": true,
+      "updatedAt": "NOW"
+    }
   ]
 }
